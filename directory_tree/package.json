@@ -1,0 +1,14 @@
+{
+  "name": "discoverfolder",
+  "version": "1.0.0",
+  "description": "show tree folder",
+  "main": "discover.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "caporal": "^0.7.0"
+  }
+}
