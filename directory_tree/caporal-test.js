@@ -10,8 +10,8 @@ prog
   .command('displayTree', 'Display tree directory')
   .argument('<sourcePath>', 'Search query')
   .action(function (args) {
-    let newPath = args.sourcePath
-    let str = ''
+    let newPath = args.sourcePath;
+    let str = '';
     const content = function discoverAll(newPath) {
 
       if (fs.statSync(newPath).isDirectory()) {

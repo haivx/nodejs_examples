@@ -26,4 +26,3 @@ function discoverAll(director) {
         console.log(str + aFile);
     }
 }
-discoverAll(sourcePath)
