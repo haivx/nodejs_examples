@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+</head>
+<body>
+{% extends "index.html" %}
+  {% block content %}
+    <div class="alert alert-warning alert-dismissible" role="alert">
+      <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <strong>Warning!</strong> Better check yourself, you're not looking too good.
+    </div>
+    {% import "form.html" as forms %}
+    {{ forms.label('Username') }}
+    {{ forms.field('user') }}
+    {{ forms.label('Password') }}
+    {{ forms.field('pass', type='password') }}
+  {% endblock %}  
+</body>
+</html>

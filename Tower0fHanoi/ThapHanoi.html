@@ -1,10 +1,186 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
-    <title>$Title$</title>
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <script src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-3.2.1.min.js"></script>
+    <script src="https://d3js.org/d3.v4.min.js"></script>
+    <title>Thap Hanoi</title>
 </head>
+
 <body>
-$END$
+<input type="text" placeholder="So dia">
+<button type="submit" onclick="callBuild()">Submit</button>
+<div class="container"></div>
+<script>
+    //    Chia bài toán làm 3 đối tượng: Disks, Tower, GameEngine
+    //    B1. Vẽ Tháp + Tower
+    //        => Xác định được tọa độ của tháp và các tower
+    //    B2: Khởi tạo game Engine:
+    //        => Dùng logic để in ra kết quả đệ qui bài toán => tạo được một mảng lưu kết quả đó
+    //        => việc cần làm là dùng vòng lặp để chạy qua các phần tử con của mảng vừa tạo
+    //        => Trong mỗi vòng lặp: Để làm đĩa di chuyển cần tính toán vị trí của đĩa và dùng d3 JS để tạo transition
+    //            chuyển động
+
+
+    let disks_input, unit_disk, tower_height;
+    let delay_disk = 0;
+    let biggest_disk = 200
+    let arr_disk = [];
+    let margin = biggest_disk + biggest_disk / 2; //tower1 có vi tri x=0,tower3 có vi tri x=2*margin
+    let disks_in_tower1 = disks_in_tower2 = disks_in_tower3 = '';
+    let h = 300;
+
+    let svg = d3.select(".container");
+
+    //Khai bao class tower
+    class Tower {
+        build_tower() {
+            for (let j = 0; j < 3; j++) {
+                svg.append('rect')
+                    .attr('x', function () {
+                        return j * margin;
+                    })
+                    .attr('y', disks_input * 40 + 190) //h
+                    .attr('rx', 10)
+                    .attr('ry', 10)
+                    .attr('width', biggest_disk)
+                    .attr('fill', 'rgba(105, 105, 105, 0.8)')
+            }
+        }
+    }
+    //Khai bao class GameEngine
+    class GameEngine {
+        letMove(n, tower1, tower2, tower3) {
+            if (n > 0) {
+                this.letMove(n - 1, tower1, tower3, tower2);
+                let newX_disk = tower3 + (total_disks - n) * (unit_disk / 2);
+                let newY_disk = '';
+
+                //Kiem tra dia can chuyen co phai tu tower1 --> tower2
+                if (tower1 === 0 && tower3 === margin) {
+                    //Gan vi tri Y moi cho dia
+                    newY_disk = tower_height - disks_in_tower2 * 40 + 150;
+
+                    //sau khi chuyển đĩa thì giảm đĩa ở fromTower và toTower
+                    disks_in_tower1--;
+                    disks_in_tower2++;
+                }
+                //Kiem tra dia can chuyen co phai tu tower 1 ---> tower 3
+                if (tower1 === 0 && tower3 === 2 * margin) {
+                    //Gan vi tri Y moi cho dia
+                    newY_disk = tower_height - disks_in_tower3 * 40 + 150;
+                    //sau khi chuyển đĩa thì giảm đĩa ở fromTower và toTower
+                    disks_in_tower1--;
+                    disks_in_tower3++;
+                }
+                //Kiem tra dia can chuyen co phai tu tower 2 ---> tower 1
+                if (tower1 === margin && tower3 === 0) {
+                    newY_disk = tower_height - disks_in_tower1 * 40 + 150;
+                    //sau khi chuyển đĩa thì giảm đĩa ở fromTower và toTower
+                    disks_in_tower2--;
+                    disks_in_tower1++;
+                }
+                //Kiem tra dia can chuyen co phai tu tower 2 ---> tower 3
+                if (tower1 === 0 && tower3 && 2 * margin) {
+                    newY_disk = tower_height - disks_in_tower3 * 40 + 150;
+                    //sau khi chuyển đĩa thì giảm đĩa ở fromTower và toTower
+                    disks_in_tower2--;
+                    disks_in_tower3++
+                }
+                //Kiem tra dia can chuyen co phai tu tower 3 ---> tower 1
+                if (tower1 === 2 * margin && tower3 === 0) {
+                    newY_disk = tower_height - disks_in_tower1 * 40 + 150;
+                    //sau khi chuyển đĩa thì giảm đĩa ở fromTower và toTower
+                    disks_in_tower3--;
+                    disks_in_tower1++
+                }
+                //Kiem tra dia can chuyen co phai tu tower 3 ---> tower 2
+                if (tower1 === 2 * margin && tower3 === margin) {
+                    newY_disk = tower_height - disks_in_tower1 * 40 + 150;
+                    //sau khi chuyển đĩa thì giảm đĩa ở fromTower và toTower
+                    disks_in_tower3--;
+                    disks_in_tower2++
+                }
+
+                arr_disk[n - 1]
+                    .transition()
+                    .delay(delay_disk * 4500)
+                    .duration(750)
+                    .attr('y', 60)
+                    .transition()
+                    .duration(750)
+                    .attr('x', newX_disk)
+                    .transition()
+                    .duration(750)
+                    .attr('y', newY_disk);
+                delay_disk++;
+                steps++;
+
+                this.letMove(n - 1, tower2, tower1, tower3);
+            }
+        }
+    }
+    //Tao function di chuyen dia
+    function callBuild() {
+        $('.container').empty();
+
+        steps = click = 1000;
+        disks_input = $('input').val();
+
+        disks_input = $('input').val();
+        class Disk {
+            build_disk() {
+                unit_disk = biggest_disk / disks_input //Chieu rong cua dia nho nhat
+
+                //tao va ve dia
+                for (let i = 0; i <= disks_input; i++) {
+                    svg.append('rect')
+                        .attr('x', function () {
+                            return (disks_input - i) * (unit_disk / 2);
+                        })
+                        .attr('y', function () {
+                            return i * 40 + 150;
+                        })
+                        .attr('width', function () {
+                            return i * unit_disk;
+                        })
+                        .attr('height', 40) //Chieu cao cua tung dia
+                        .attr('rx', 10) //Bo goc cua tung dia
+                        .attr('ry', 10) //Bo goc cua tung dia
+                        .attr('stroke-width', 1)
+                        .attr('stroke', 'black')
+                        .classed('disk' + i + 'color', true);
+                    //Gan class cho tung dia
+
+                    arr_disk.push(d3.select('.disk' + i)); //chuyen dia vao mang da khoi tao ban dau
+                }
+                d3.selectAll("rect").style("fill", function () { // Tạo màu cho từng đĩa Random
+                    return "hsl(" + Math.random() * 360 + ",100%,50%)";
+                });
+            }
+        }
+        let svg = d3.selectAll(".container")
+            .append("svg")
+            .attr('width', 200)
+            .attr('height', h + disks_input * 40 + 300);
+        tower_height = disks_input * 40;
+        disks_in_tower1 = total_disks = disks_input;
+        let build_disk = new Disk();
+        let build_tower = new Tower();
+        build_disk.build_disk();
+        build_tower.build_tower();
+
+        let gameEngine = new GameEngine(3);
+        let tower1 = 0;
+        tower2 = margin;
+        tower3 = 2 * margin;
+        gameEngine.letMove(3, tower1, tower2, tower3)
+    }
+</script>
 </body>
+
 </html>

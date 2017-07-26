@@ -1,23 +1,25 @@
 /**
  * Created by xuanhai on 11/07/2017.
  */
+
 const path = require('path');
 const fs = require('fs');
-const sourcePath = '/home/xuanhai/Desktop/CSS-framework';
+const sourcePath = '/home/xuanhai/Desktop/nodejs_examples/directory_tree/CSS-framework';
 let str = "";
 function discoverAll(director) {
     if (fs.statSync(director).isDirectory()) {
         let list = fs.readdirSync(director)
+       // console.log(list)
         list.forEach((file) => {
             a = director + '/' + file;
             if (fs.statSync(a).isDirectory()) {
-                str += '    '
+                str += '|   '
                 console.log(str + '├──' + file);
 
                 discoverAll(a);
                 str = str.substring(4)
             } else {
-                console.log(str + '    └──' + file)
+                console.log(str + '|   └──' + file)
             }
         })
     } else {
@@ -26,3 +28,6 @@ function discoverAll(director) {
         console.log(str + aFile);
     }
 }
+discoverAll(sourcePath)
+
+module.exports = discoverAll
