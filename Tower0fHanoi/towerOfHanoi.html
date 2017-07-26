@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <script src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-3.2.1.min.js"></script>
+    <script src="https://d3js.org/d3.v4.min.js"></script>
+    <title>Document</title>
+    <style>
+    button {
+        float: left;
+        background: green;
+        color: white;
+        border: 1px solid green;
+        margin: 20px;
+        padding: 10px;
+        font-size: 20px;
+    }
+
+    button:hover {
+        cursor: pointer;
+    }
+
+    input {
+        float: left;
+        margin: 22px 0;
+        padding: 10px;
+    }
+    </style>
+</head>
+
+<body>
+    <button onclick="move()">Click here</button>
+    <input type="text" name="count" placeholder="Chon so luong" id="info">
+    <div class="content">
+    </div>
+    <script>
+    //Bước 1: Giải quyết thuần Logic thông qua console.log
+
+    //Chia bài toán ra 3 class: Class Disk,class Tower và Class GameEngine để chạy chương trình.
+
+    //Khai bao class Disk
+    function move() {
+        $( ".content" ).empty();
+        let numberOfDisk = document.getElementById('info').value;
+
+        var numberOfTower = 3;
+        var diskArr = [];
+        var towerArr = [];
+
+        class Disk {
+            constructor(nameDisks, d) {
+                this.name = nameDisks;
+                this.diameter = this.d;
+            }
+
+            drawDisk(svgInput, attrX, attrY, attrWidth, attrHeight, attrClass, x_, y_, height) {
+                svgInput.append('rect')
+                    .attr("x", attrX)
+                    .attr("y", attrY)
+                    .attr("width", attrWidth)
+                    .attr("height", attrHeight)
+                    .attr("class", attrClass);
+
+                this.x_ = x_;
+                this.y_ = y_;
+                this.height = height;
+            }
+        }
+
+        //Khai bao class tower
+        class Tower {
+            constructor(nameTowers, arrOfDisk) {
+                this.tower = nameTowers;
+                this.arrOfDisk = arrOfDisk;
+            }
+
+            drawTower(svgInput, attrX1, attrY1, attrX2, attrY2) {
+                svgInput.insert('line', ':first-Child')
+                    .attr("x1", attrX1)
+                    .attr("y1", attrY1)
+                    .attr("x2", attrX2)
+                    .attr("y2", attrY2)
+                    .attr("stroke-width", 10)
+                    .attr("stroke", "black");
+            }
+        }
+        //Thuộc tính data sẽ là một mảng đổi tượng, mỗi đối tượng tương ứng với việc chuyển đĩa từ tower này sang tower
+        //khác. Do dó data sẽ chứa đối tượng gồm 3 thuộc tính sau:(diskToPick,fromTower, toTower)
+
+        //Vẽ thẻ svg
+        var p = {
+            svgWidth: 1200,
+            svgHeight: 600,
+            diskHeight: 50,
+            distanceNearestTower: 400,
+            distanceFutherTower: 800,
+            towerBuffer: 100
+        };
+        var svg = d3.select(".content")
+            .append('svg')
+            .attr('width', p.svgWidth)
+            .attr('height', p.svgHeight);
+
+        //Vẽ đĩa
+
+        for (var i = 1; i <= numberOfDisk; i++) {
+            diskArr.push(new Disk('disk' + i, i));
+
+            diskArr[i - 1].drawDisk(
+                svg,
+                (numberOfDisk - i) * p.diskHeight / 2 + p.diskHeight * 2,
+                i * p.diskHeight + 2 * p.diskHeight,
+                i * p.diskHeight,
+                p.diskHeight,
+                'color disk' + i,
+                0,
+                i * p.diskHeight,
+                i * p.diskHeight + p.diskHeight
+            );
+        }
+
+        for (var j = 1; j <= numberOfTower; j++) {
+            if (j - 1 === 0) {
+                towerArr.push(new Tower('tower' + j, diskArr));
+            } else {
+                towerArr.push(new Tower('tower' + j, []));
+            }
+
+            towerArr[j - 1].drawTower(
+                svg,
+                p.towerBuffer + (numberOfDisk * p.diskHeight) / 2,
+                120,
+                p.towerBuffer + (numberOfDisk * p.diskHeight) / 2,
+                numberOfDisk * p.diskHeight + 150
+            );
+            p.towerBuffer += 400;
+        }
+
+
+        d3.selectAll('.color').style('fill', function() {
+            return `hsl( ${Math.random() * 360}  ,100%,50%)`
+        });
+
+
+        //reset lại buffer
+        p.towerBuffer = 100;
+        //Khai bao class GameEngine
+        class GameEngine {
+            constructor() {
+                //đếm các bước thực hiện bài toán
+                this.count = 0;
+                //Định nghĩa property dạng mảng
+                this.data = [];
+                //Định nghĩa step dạng đối tượng
+                this.step = {};
+            }
+
+
+            towerOfHanoi(n, a, b, c) {
+                if (n > 0) {
+                    this.towerOfHanoi(n - 1, a, c, b);
+                    //console.log(`Move disk ${n} from ${a.tower} to ${c.tower}`);
+                    //tượng tự console.log ở trên,ta gán tham số cho step rồi đẩy vào mảng data
+                    this.step = {
+                        diskToPick: diskArr[n - 1], //đĩa sẽ chọn(n-1 là do diskArr ở dạng mảng)
+                        fromTower: a, //truyền vào tower1
+                        toTower: c //gán cho tower3
+                    };
+                    // sau khi gán thuộc tính cho step thì đẩy vào data
+                    this.data.push(this.step);
+                    this.count++; //count the count
+                    this.towerOfHanoi(n - 1, b, a, c);
+                }
+            }
+
+            //Method trả về khoảng cách giữa 2 tower
+
+            get_distance(tower1, tower2) {
+                switch (true) {
+                    case (tower1 === 'tower1' && tower2 === 'tower2' || tower1 === 'tower2' && tower2 === 'tower3'):
+                        return p.distanceNearestTower;
+                    case (tower1 === 'tower2' && tower2 === 'tower1' || tower1 === 'tower3' && tower2 === 'tower2'):
+                        return -p.distanceNearestTower;
+                    case (tower1 === 'tower1' && tower2 === 'tower3'):
+                        return p.distanceFutherTower;
+                    default:
+                        return -p.distanceFutherTower;
+                }
+            }
+
+            //Cập nhật lại đĩa trên các tháp sau khi di chuyển
+            update_disk(disk, t1, t2) {
+                t1.arrOfDisk.pop();
+                t2.arrOfDisk.push(disk);
+            }
+
+            //Phuong thuc Animation
+            animateDisk(diskLength, diskHeight, animationDelay, animationDuration) {
+                //console.log(this.data);
+                this.data.forEach(function(data, i) {
+                    //Lay khoang cach ma dia se di giua 2 tower
+                    this.distanceBetweenTowers = this.get_distance(data.fromTower.tower, data.toTower.tower);
+                    //Lay thuoc tinh x bat dau cua dia
+                    this.begin_x = data.diskToPick.x_;
+
+                    //Lay thuoc tinh y bat dau cua dia
+                    this.begin_y = data.diskToPick.y_;
+                    console.log(this.begin_y);
+                    //Tinh toan so luong dia trong tower
+                    this.countDisks = data.toTower.arrOfDisk.length;
+                    //Toa do x moi
+                    this.new_x = this.begin_x + this.distanceBetweenTowers;
+                    //Toa do y moi
+                    this.new_y = diskLength * diskHeight - (this.countDisks * diskHeight) - this.begin_y;
+                    console.log(this.new_y);
+                    //Tao huong nhac dia
+                    this.pickUpHeight = -data.diskToPick.height;
+
+                    //Cap nhat lai dia tren moi tower
+                    this.update_disk(data.diskToPick, data.fromTower, data.toTower);
+                    //Animation de nhac dia
+
+                    d3.selectAll('.' + data.diskToPick.name)
+                        .transition()
+                        .delay(i * animationDelay)
+                        .duration(animationDuration)
+                        .attr('transform', 'translate(' + this.begin_x + ',' + this.pickUpHeight + ')')
+                        .transition()
+                        .attr('transform', 'translate(' + this.new_x + ',' + this.pickUpHeight + ')')
+                        .transition()
+                        .attr('transform', 'translate(' + this.new_x + ',' + this.new_y + ')');
+                    data.diskToPick.x_ += this.distanceBetweenTowers;
+                }.bind(this));
+            }
+        }
+
+        var game = new GameEngine();
+
+        game.towerOfHanoi(numberOfDisk, towerArr[0], towerArr[1], towerArr[2]);
+        game.animateDisk(numberOfDisk, 50, 3000, 1000);
+        document.getElementById('info').value = ' ';
+    }
+    </script>
+</body>
+
+</html>
