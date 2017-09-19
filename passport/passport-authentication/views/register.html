@@ -1,0 +1,16 @@
+{% extends "layout.html" %}
+ {% block register %}
+  <form action="/users/register" method="POST" id="formRegister">
+    <h2>Please Sign up</h2>
+    <label for="inputUsername">Username</label>
+    <input type="text" name="username" id="inputUsername" required>
+    <label for="in putEmail">Email</label>
+    <input type="text" name="email" id="inputEmail" required>
+    <label for="inputPassword">Password</label>
+    <input type="password" name="password" id="inputPassword">
+    <label for="inputConfirmationpassword">Confirm password</label>
+    <input type="password" name="confirmationPassword" id="inputConfirmationPassword">
+    <br>
+    <button class="btn btn-primary" type="submit">Submit</button>
+  </form>
+  {% endblock %}

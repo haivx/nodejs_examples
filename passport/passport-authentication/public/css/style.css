@@ -1,0 +1,17 @@
+#formRegister {
+  margin: 10px auto;
+  text-align: center;
+  border: 1px solid grey
+}
+input {
+  display: block;
+  margin: 10px auto;
+}
+h1 {
+  text-align: center
+}
+#loginForm{
+  margin: 10px auto;
+  text-align: center;
+  border: 1px solid grey
+}

@@ -1,0 +1,13 @@
+{% extends "layout.html" %}
+
+{% block login %}
+    <h1>Please sign in</h1>
+   <form action="/users/login" method="POST" id="loginForm">
+    <label for="in putEmail">Email</label>
+    <input type="text" name="email" id="inputEmail" required>
+    <label for="inputPassword">Password</label>
+    <input type="password" name="password" id="inputPassword">
+    <br>
+    <button class="btn btn-primary" type="submit">Submit</button>
+  </form>
+{% endblock%}
